@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "454209738650",
+    "project_id": "garma-garam-tiffin-app",
+    "storage_bucket": "garma-garam-tiffin-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454209738650:android:13d9d6448b52a6c926cc23",
+        "android_client_info": {
+          "package_name": "com.example.garma_garam_tiffin_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJ14IDTtJyv2xFX80Mo0GK-W8pUAGScV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
