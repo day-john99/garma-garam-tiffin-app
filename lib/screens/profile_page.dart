@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
@@ -46,7 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: Text(settingList.keys.elementAt(index)),
                 trailing: index == 5 ? null : const Icon(Icons.chevron_right),
                 onTap: (){
-                  //todo create a list of function
+                  FirebaseAuth.instance.signOut();
                 },
               );
             }),
