@@ -1,6 +1,6 @@
 import '../firebase_options.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';  // Import this
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';          // DateTime settings
@@ -19,17 +19,33 @@ int mobileno = 5555422952;
 var user_id ;         // not a string but something unique combination
 String uniqueId = "";
 
-
 // accountsData functn
 var name = "lucy";
 var address = "street101";
 var category = "chef";
 var uid_temp;
 
-
 // customerFavRestaurant functn
 var fav_chefs=[];
 String temp_category = "chef";
+
+// customerOrders functn
+var order_id;       // some unique combinations
+String order_id_final = "";
+final DateFormat dateformat = DateFormat('dd MM yyyy HH:mm:ss'); // Define the date format based on the input string format
+String ordertype="subscription";
+String customer_id="ds56f165s13c0354";
+String restaurant_id="62262ff";
+String menu_item_id="22aa";
+String dt_order_placed="05 09 2024 18:05:00";
+String dt_order_to_be_delivered="05 09 2024 18:05:00";
+String dt_order_actual_time_of_delivery="05 09 2024 18:05:00";
+String veg_nonveg="";
+int days_subscribed_for=25;
+List<String> dt_orders_skipped=[];
+List<String> past_orders=[];
+
+
 
 
 
@@ -43,7 +59,7 @@ var dt = "05 09 2024 18:05:00";
 var order_address = "NearChurch";
 int order_mobileno = 99999999 ;
 String order_status = "";
-var order_id = Uuid();           // generating order uid
+// var order_id = Uuid();           // generating order uid
 String orderId = "";             // storing order_id
 
 // studentReviews
@@ -77,6 +93,13 @@ void main() async {
   ob.loginData( email , mobileno );
   ob.accountsData( name , address , category , email , mobileno );
   ob.customerFavRestaurant(  email , fav_chefs );
+  ob.customerOrders( ordertype , customer_id , restaurant_id
+      , menu_item_id , address , mobileno , order_status
+      , dt_order_placed, dt_order_to_be_delivered
+      , dt_order_actual_time_of_delivery
+      , veg_nonveg , days_subscribed_for
+      , dt_orders_skipped
+      , past_orders                    );
 }
 
 
@@ -157,16 +180,16 @@ class UserProvider with ChangeNotifier {
   // 3 entitites are there - users , flutter , db ;who enters functn parameters of below functns
 
   // user/customer/chef enters email and mobileno and db itself generates uid
-  void loginData(String email , int mobileno ) async {
+  void loginData(String email , int mobileno )  {
 
     try {
       // uuid creation
       var user_id = Uuid();       // unique id generation
-      String uniqueId = await Future.delayed( Duration(seconds: 1), () => user_id.v4());
+      String uniqueId =  user_id.v4();
 
 
       // store data in db
-      await db.collection("Login data").doc(email).set({
+       db.collection("Login data").doc(email).set({
         "userMobileNo": mobileno,
         "userEmail": email,
         "userUniqueId": uniqueId
@@ -190,6 +213,10 @@ class UserProvider with ChangeNotifier {
   * */
   void customerFavRestaurant( String email , var fav_chefs ) async {
 
+    // Delay for 1 second
+    await Future.delayed(Duration(milliseconds: 100));
+
+
     try {
       // find uniqueId in Logindetails collection
 
@@ -202,7 +229,7 @@ class UserProvider with ChangeNotifier {
       // Check if the document exists
       if (documentSnapshot.exists) {
         // Access the data
-        Map<String, dynamic> data = await documentSnapshot.data() as Map<
+        Map<String, dynamic> data =  documentSnapshot.data() as Map<
             String,
             dynamic>;
 
@@ -217,7 +244,7 @@ class UserProvider with ChangeNotifier {
 
       // store data in db only if email category is chef
       if (temp_category == "chef") {
-        await db.collection("Customer Fav. Restaurants").doc(email).set({
+          db.collection("Customer Fav. Restaurants").doc(email).set({
           "cutomerEmail": email,
           "customerUniqueId": uid_temp,
           "customerFavRestaurant_aka_chefId": fav_chefs
@@ -266,8 +293,11 @@ class UserProvider with ChangeNotifier {
       await db.collection("Accounts data").doc(email).set({
         "userName": name,
         "userAddress": address,
+        "userMobileno": mobileno,
+        "userEmail": email,
         "userCategory": category, // chef or customer
         "userUniqueId": uid_temp
+
       }
       );
 
@@ -280,12 +310,85 @@ class UserProvider with ChangeNotifier {
 
   } // functn ends
 
+
+
+  /* user/customer provides ordertype
+     flutter provides order_status,time_order_placed,time_order_to_be_delivered,time_actual_time_of_delivery
+     db provides uid_chef , uid_customer , uid_thali , uid_order ,veg_nonveg_type
+  * */
+  void customerOrders(String ordertype ,String customer_id ,String restaurant_id
+      ,String menu_item_id , String address ,int mobileno , String order_status
+      ,String dt_order_placed,String dt_order_to_be_delivered
+      ,String dt_order_actual_time_of_delivery
+      ,String veg_nonveg ,int days_subscribed_for
+      , List<String> dt_orders_skipped
+      , List<String> past_orders                    )  {
+
+
+    try{
+
+      // uid generation for each order
+      var order_id = Uuid();       // unique id generation
+      order_id_final =  order_id.v4();
+
+      // convert dt to DateTime
+      // Datetime string dt_order_placed =  "05 09 2024 18:05:00";
+      final DateTime DT_order_placed = dateformat.parse(dt_order_placed);
+      final DateTime DT_order_to_be_delivered = dateformat.parse(dt_order_to_be_delivered);
+      final DateTime DT_order_actual_time_of_delivery = dateformat.parse(dt_order_actual_time_of_delivery);
+
+
+      // store data in db
+       db.collection("Customer Orders").doc(order_id_final).set({
+        "customerOrderId": order_id_final,
+        "customerOrdertype": ordertype,
+        "customerId":customer_id,
+        "restaurantID":restaurant_id,
+        "customerCurrentOrderItems":menu_item_id,    // orderitems contain uid of a unique item of restaurant menu
+        "customerAddress":address,
+        "customerMobileno":mobileno,
+        "customerOrderStatus": order_status,
+        "orderPlacedTime":DT_order_placed,
+        "orderTimeToBeDelivered":DT_order_to_be_delivered,
+        "orderActualTimeOfDelivery":DT_order_actual_time_of_delivery,
+        "orderVegNonveg": veg_nonveg,
+        "daysSubscribedFor ":days_subscribed_for ,      // only for subscription model else null
+        "datetimeOrdersSkipped":dt_orders_skipped ,     // only for subscription model else null
+        "pastOrdersIdList":past_orders,                 // only for subscription model else null
+        // past_orders conatin orderIds of previous orders
+      }
+      );
+
+
+      print("\n customer orders written successfully");
+    }// try ends
+
+
+    catch (e) {
+      print("Failed to write customer orders in db due to: $e");
+    }//catch ends
+
+
+  }// functn ends
+
+
+
   // -----------------------------------------------------------------------------------
 
 
 
+
+
+
+
+
+
+
+
+
+
   // adds students current order details
-  void customerOrders(String chef_name, String chef_id, List<String> items,
+  void cusomerOrders(String chef_name, String chef_id, List<String> items,
       String dt, String order_address, int order_mobileno, uniqueId,
       String order_status) async {
     try {
