@@ -45,6 +45,16 @@ int days_subscribed_for=25;
 List<String> dt_orders_skipped=[];
 List<String> past_orders=[];
 
+// homeRestaurants functn
+String chef_restaurant_id="";
+String chef_email="test@email";
+String restaurant_name = "foodLibs";
+bool is_veg=true;
+bool is_available_tomorrow=true;
+int max_customers_capacity=20;
+List<Map<String, dynamic>> menu = [ { "thaliName":"basic","thaliItems":['dal','roti','sabji'] , "thaliPrice":2500 ,"thaliID":"2ds4d96s2d"}
+                                ,{ "thaliName":"basic","thaliItems":['dal','roti','sabji','rice'] , "thaliPrice":3000 ,"thaliID":"5d5d5"}
+                      ,{ "thaliName":"basic","thaliItems":['dal','roti','sabji','rice','salad'] , "thaliPrice":3500 ,"thaliID":"a65s8s6"} ];
 
 
 
@@ -100,7 +110,14 @@ void main() async {
       , veg_nonveg , days_subscribed_for
       , dt_orders_skipped
       , past_orders                    );
+  ob.homeRestaurants( chef_email , restaurant_name
+      , is_veg ,  is_available_tomorrow , max_customers_capacity
+      ,  menu );
+
 }
+
+
+
 
 
 
@@ -214,7 +231,7 @@ class UserProvider with ChangeNotifier {
   void customerFavRestaurant( String email , var fav_chefs ) async {
 
     // Delay for 1 second
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(Duration(milliseconds: 1000));
 
 
     try {
@@ -370,6 +387,64 @@ class UserProvider with ChangeNotifier {
 
 
   }// functn ends
+
+
+  /*
+   menu list will contain dictionaries of this type shownn below
+    List<Map<String, dynamic>> menu = [ { "thaliName":"basic","thaliItems":['dal','roti','sabji'] , "thaliPrice":2500 ,"thaliID":"2ds4d96s2d"}
+                                ,{ "thaliName":"basic","thaliItems":['dal','roti','sabji','rice'] , "thaliPrice":3000 ,"thaliID":"5d5d5"}
+                      ,{ "thaliName":"basic","thaliItems":['dal','roti','sabji','rice','salad'] , "thaliPrice":3500 ,"thaliID":"a65s8s6"} ];
+
+  * */
+  void homeRestaurants(String chef_email , String restaurant_name
+      ,bool is_veg , bool is_available_tomorrow , int max_customers_capacity
+      , List<Map<String, dynamic>> menu ) async {
+
+    try {
+
+      //via provided email ,find userUniqueId  in Accounts data collection
+
+      // Reference the specific document in the collection
+      DocumentSnapshot documentSnapshot = await db.collection("Accounts data").doc(
+          email).get();
+      // print("\n snapshot : $documentSnapshot.data");
+
+      // Check if the document exists
+      if (documentSnapshot.exists) {
+        // Access the data
+        Map<String, dynamic> data = await documentSnapshot.data() as Map<
+            String,
+            dynamic>;
+
+        // Example: Access specific fields
+        chef_restaurant_id = data["userUniqueId"];
+      } // if ends
+
+
+      // store data in db
+      await db.collection("Home Restaurants").doc(chef_email).set({
+        "chefEmail": chef_email,
+        "chef_restaurantUniqueId": chef_restaurant_id,
+        "restaurantName": restaurant_name,
+        "restaurantIsVeg": is_veg,
+        "chefAvailableTomorrow": is_available_tomorrow,
+        "restaurantMaxCapacity": max_customers_capacity, // chef or customer
+        "menuItems":menu,
+
+      }
+      );
+
+      print("\n successfully stored in db, homeRestaurants data");
+
+    }// try ends
+    catch (e) {
+      print("\nFailed to store HomeRestaurants data: $e");
+    }//catch ends
+
+
+
+  }// functn ends
+
 
 
 
