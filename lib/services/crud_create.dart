@@ -114,7 +114,7 @@ void main() async {
       , is_veg ,  is_available_tomorrow , max_customers_capacity
       ,  menu );
 
-}
+}// main ends
 
 
 
@@ -135,7 +135,7 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-}
+}// class ends
 
 class MyHomePage extends StatelessWidget {
   @override
@@ -161,7 +161,7 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
-}
+}// class ends
 
 class UserProvider with ChangeNotifier {
 
@@ -264,7 +264,7 @@ class UserProvider with ChangeNotifier {
           db.collection("Customer Fav. Restaurants").doc(email).set({
           "cutomerEmail": email,
           "customerUniqueId": uid_temp,
-          "customerFavRestaurant_aka_chefId": fav_chefs
+          "customerFavRestaurantId_or_chefId": fav_chefs
         }
         );
     } // if ends
@@ -389,6 +389,10 @@ class UserProvider with ChangeNotifier {
   }// functn ends
 
 
+
+
+
+
   /*
    menu list will contain dictionaries of this type shownn below
     List<Map<String, dynamic>> menu = [ { "thaliName":"basic","thaliItems":['dal','roti','sabji'] , "thaliPrice":2500 ,"thaliID":"2ds4d96s2d"}
@@ -447,60 +451,11 @@ class UserProvider with ChangeNotifier {
 
 
 
-
   // -----------------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
-
-
-
-
   // adds students current order details
-  void cusomerOrders(String chef_name, String chef_id, List<String> items,
-      String dt, String order_address, int order_mobileno, uniqueId,
-      String order_status) async {
-    try {
-      // Generate a v4 (random) id
-      orderId = await Future.delayed(Duration(seconds: 1), () => order_id.v4());
-
-      // convert dt to DateTime
-      // Define the date format based on the input string format
-      final DateFormat dateformat = DateFormat('dd MM yyyy HH:mm:ss');
-      final DateTime datetime = dateformat.parse(dt);
-
-      // Datetime string dt =  "05 09 2024 18:05:00";
-
-      // Store the data in Firestore
-      await FirebaseFirestore.instance.collection('Orders').doc(orderId).set({
-        'chefName': chef_name,
-        'chefId': chef_id,
-        'orderItems': items,
-        'orderDateTime': datetime,
-        'orderAddress': order_address,
-        'customerMobileNo': order_mobileno,
-        'customerId': uniqueId,
-        'orderStatus': order_status,
-        'orderUniqueId': orderId
-      }
-      );
-
-      print("\nUser order data written successfully.");
-    }
-    catch (e) {
-      print('Error parsing date: $e');
-    }
-  } // functn end
-
-
-  // adds students current order details
-  void customerReviews(String chef_name, String chef_id, List<String> items, dt,
+  void customerReviews(String chef_name, String chef_restaurant_id, List<String> items, dt,
       orderId, review, rating, uniqueId) async {
     try {
       // convert dt to DateTime
@@ -513,7 +468,7 @@ class UserProvider with ChangeNotifier {
       // Store the data in Firestore
       await FirebaseFirestore.instance.collection('Reviews').doc().set({
         'chefName': chef_name,
-        'chefId': chef_id,
+        'chefId': chef_restaurant_id,
         'orderItems': items,
         'orderId': orderId,
         'orderReviews': review,
@@ -532,29 +487,8 @@ class UserProvider with ChangeNotifier {
   } // functn end
 
 
-  // adds students current order details
-  void dishes(chef_id, chef_name, List<String> dishes,
-      List<String> food_ethinicity) async {
-    try {
-      // Store the data in Firestore with each doc unique to chef_id thus data overwritten when editing
-      await FirebaseFirestore.instance.collection('Dishes').doc(chef_id).set({
-        'chefId': chef_id,
-        'chefName': chef_name,
-        'dishes': dishes,
-        'foodEthinicity': food_ethinicity
-      }
 
-      );
-
-      print("\nDishes by chef written successfully.");
-    }
-    catch (e) {
-      print('Error parsing date: $e');
-    }
-  } // functn end
-
-
-}
+} // class ends
 
 
 
