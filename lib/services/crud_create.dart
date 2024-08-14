@@ -42,6 +42,7 @@ String dt_order_to_be_delivered="05 09 2024 18:05:00";
 String dt_order_actual_time_of_delivery="05 09 2024 18:05:00";
 String veg_nonveg="";
 int days_subscribed_for=25;
+String order_status = "cooking" ; // possible order status are : cooking , dispatched , delivered
 List<String> dt_orders_skipped=[];
 List<String> past_orders=[];
 
@@ -68,7 +69,7 @@ List<String> items = ['maggie','pasta','shake'];
 var dt = "05 09 2024 18:05:00";
 var order_address = "NearChurch";
 int order_mobileno = 99999999 ;
-String order_status = "";
+//String order_status = "";
 // var order_id = Uuid();           // generating order uid
 String orderId = "";             // storing order_id
 
@@ -95,10 +96,8 @@ void main() async {
   }
   runApp(MyApp());
   var ob = UserProvider();
-  //ob.loginPageData( name,  mobileno, email, address, category);
-  //ob.customerOrders( chef_name , chef_id , items , dt , order_address , order_mobileno,uniqueId,order_status);
-  //ob.customerReviews( chef_name ,chef_id , items ,dt, orderId , review , rating ,uniqueId );
-  //ob.dishes(  chef_id , chef_name , dishes , food_ethinicity   ) ;
+
+
   ob.setupCollections();
   ob.loginData( email , mobileno );
   ob.accountsData( name , address , category , email , mobileno );
@@ -113,6 +112,9 @@ void main() async {
   ob.homeRestaurants( chef_email , restaurant_name
       , is_veg ,  is_available_tomorrow , max_customers_capacity
       ,  menu );
+  //ob.customerReviews( chef_name ,chef_id , items ,dt, orderId , review , rating ,uniqueId );
+  ob.getAvailableRestaurants();
+  ob.getOrderStatus(order_status);
 
 }// main ends
 
@@ -435,7 +437,7 @@ class UserProvider with ChangeNotifier {
         "restaurantMaxCapacity": max_customers_capacity, // chef or customer
         "menuItems":menu,
 
-      }
+      }, SetOptions(merge: true)
       );
 
       print("\n successfully stored in db, homeRestaurants data");
@@ -466,7 +468,7 @@ class UserProvider with ChangeNotifier {
       // Datetime string dt =  "05 09 2024 18:05:00";
 
       // Store the data in Firestore
-      await FirebaseFirestore.instance.collection('Reviews').doc().set({
+      await db.collection('Reviews').doc().set({
         'chefName': chef_name,
         'chefId': chef_restaurant_id,
         'orderItems': items,
@@ -485,6 +487,78 @@ class UserProvider with ChangeNotifier {
       print('Error parsing date: $e');
     }
   } // functn end
+
+//-------------------------------------------------------------------------------------------------------------------------
+
+// GET functns
+
+  void getAvailableRestaurants() async {
+
+    try {
+      // Query to get available restaurants/chefs
+      QuerySnapshot<Map<String, dynamic>> availableRestaurant = await db
+          .collection('Home Restaurants')
+          .where("chefAvailableTomorrow", isEqualTo: true)
+          .get();
+
+      // Printing each document in the query result
+      for (var doc in availableRestaurant.docs) {
+        // Each `doc` is a DocumentSnapshot
+        Map<String, dynamic>? data = doc.data();
+
+        print('\nDocument ID: ${doc.id}');
+        print('\nDocument Data: $data');
+        print('---');
+      } // for ends
+
+      print("\n successfully got restaurant active status ");
+
+    }// try ends
+    catch (e) {
+      print("\n failed getting restaurant active status: $e  ");
+    }
+
+
+  }// functn ends
+
+
+  /* gets all order docs from Customer Orders collection where ,order_status
+   is : cooking , dispatched , delivered  */
+  void getOrderStatus(String order_status) async {
+
+    try {
+
+      // Query to get available restaurants/chefs
+      QuerySnapshot<Map<String, dynamic>> availableRestaurant = await db
+          .collection('Customer Orders')
+          .where("customerOrderStatus", isEqualTo: order_status )
+          .get();
+
+      // Printing each document in the query result
+      for (var doc in availableRestaurant.docs) {
+        // Each `doc` is a DocumentSnapshot
+        Map<String, dynamic>? data = doc.data();
+
+        print('\nDocument ID: ${doc.id}');
+        print('\nDocument Data: $data');
+        print('---');
+      } // for ends
+
+
+
+      print("\n Successfully got Order Status data");
+    }// try ends
+    catch (e) {
+      print("\n Failed getting Order Status");
+    }// catch ends
+
+
+  }// functn ends
+
+
+
+
+
 
 
 
