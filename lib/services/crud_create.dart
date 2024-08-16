@@ -22,6 +22,8 @@ String uniqueId = "";
 // accountsData functn
 var name = "lucy";
 var address = "street101";
+double latitude=5566593.96;
+double longitude=12198230.995;
 var category = "chef";
 var uid_temp;
 
@@ -42,7 +44,7 @@ String dt_order_to_be_delivered="05 09 2024 18:05:00";
 String dt_order_actual_time_of_delivery="05 09 2024 18:05:00";
 String veg_nonveg="";
 int days_subscribed_for=25;
-String order_status = "cooking" ; // possible order status are : cooking , dispatched , delivered
+String order_status = "cooking" ; // possible order status are : cooking , delayed , cancelled , delivered
 List<String> dt_orders_skipped=[];
 List<String> past_orders=[];
 
@@ -82,6 +84,13 @@ List<String> dishes = [] ;
 List<String> food_ethinicity = [];
 
 
+// GET FUNCTNS -------------------------------------------------
+
+// Get customerAddress
+String customerEmail= "test@email";
+
+
+
 
 
 void main() async {
@@ -100,7 +109,7 @@ void main() async {
 
   ob.setupCollections();
   ob.loginData( email , mobileno );
-  ob.accountsData( name , address , category , email , mobileno );
+  ob.accountsData( name , address , latitude, longitude, category , email , mobileno );
   ob.customerFavRestaurant(  email , fav_chefs );
   ob.customerOrders( ordertype , customer_id , restaurant_id
       , menu_item_id , address , mobileno , order_status
@@ -115,6 +124,7 @@ void main() async {
   //ob.customerReviews( chef_name ,chef_id , items ,dt, orderId , review , rating ,uniqueId );
   ob.getAvailableRestaurants();
   ob.getOrderStatus(order_status);
+  ob.getCustomerAddress( customerEmail);
 
 }// main ends
 
@@ -286,7 +296,7 @@ class UserProvider with ChangeNotifier {
   already entered during loginData is used to find uniqueId of user and
   store in db
   * */
-  void accountsData(String name, String address, String category ,String email , int mobileno  ) async {
+  void accountsData(String name, String address,double latitude,double longitude, String category ,String email , int mobileno  ) async {
 
     try {
 
@@ -312,6 +322,8 @@ class UserProvider with ChangeNotifier {
       await db.collection("Accounts data").doc(email).set({
         "userName": name,
         "userAddress": address,
+        "addressLatitue":latitude,
+        "addressLongitude":longitude,
         "userMobileno": mobileno,
         "userEmail": email,
         "userCategory": category, // chef or customer
@@ -523,7 +535,7 @@ class UserProvider with ChangeNotifier {
 
 
   /* gets all order docs from Customer Orders collection where ,order_status
-   is : cooking , dispatched , delivered  */
+   is : cooking , delayed , cancelled , delivered  */
   void getOrderStatus(String order_status) async {
 
     try {
@@ -555,6 +567,41 @@ class UserProvider with ChangeNotifier {
 
   }// functn ends
 
+
+
+  void getCustomerAddress(String customerEmail) async {
+
+    try {
+
+      // Query to get available restaurants/chefs
+      QuerySnapshot<Map<String, dynamic>> customerAddress = await db
+          .collection('Accounts data')
+          .where("userEmail", isEqualTo: customerEmail)
+          .get();
+
+      // Printing each document in the query result
+      for (var doc in customerAddress.docs) {
+        // Each `doc` is a DocumentSnapshot
+        Map<String, dynamic>? data = doc.data();
+
+        print('\nDocument ID: ${doc.id}');
+        print('\nDocument Data: $data');
+        print('---');
+      } // for ends
+
+      print("\n successfully got customer address ");
+
+
+
+
+    }// try ends
+    catch (e) {
+      print("\n Failed getting Cutomer Address: $e");
+    }
+
+
+
+  }// functn ends
 
 
 
